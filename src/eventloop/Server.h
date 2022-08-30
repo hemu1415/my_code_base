@@ -33,9 +33,9 @@ class Server {
                                                LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                                (struct sockaddr*)&sin,
                                                sizeof(sin));
-        };
+        }
 
     private:
         EventLoop* el_
-        struct sockaddr_in sin_;
+        Address address_;
 };
