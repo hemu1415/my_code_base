@@ -38,8 +38,8 @@ class BufferEvent {
         void setCB(EventCallback readCallback, EventCallback writeCallback)
         {
             //Binding read event callback function, write event callback function, error event callback function
-            bufferevent_setcb(bev_, readCallback.target<void(struct bufferevent *bev, void *ctx)>(),
-                                    writeCallback.target<void(struct bufferevent *bev, void *ctx)>(),
+            bufferevent_setcb(bev_, *readCallback.target<void(*)(struct bufferevent *bev, void *ctx)>(),
+                                    *writeCallback.target<void(*)(struct bufferevent *bev, void *ctx)>(),
                                     NULL, NULL);
 
             bufferevent_enable(bev_, EV_WRITE);

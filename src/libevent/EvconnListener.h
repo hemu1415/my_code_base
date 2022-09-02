@@ -14,7 +14,7 @@ class EvconnListener {
         EvconnListener(const EventBase& base, struct sockaddr_in addr, ConnectionCallback cb)
         {
             //Create, bind and listen to socket
-            listener_ = evconnlistener_new_bind(base, cb.target<void(struct evconnlistener*, evutil_socket_t, struct sockaddr*, int, void*)>(), NULL,
+            listener_ = evconnlistener_new_bind(base, *cb.target<void(*)(struct evconnlistener*, evutil_socket_t, struct sockaddr*, int, void*)>(), NULL,
                                                LEV_OPT_REUSEABLE|LEV_OPT_CLOSE_ON_FREE, -1,
                                                (struct sockaddr*)&addr,
                                                sizeof(addr));

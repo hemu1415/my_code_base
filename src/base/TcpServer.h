@@ -2,6 +2,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 #include <TcpConnection.h>
 #include <Acceptor.h>
