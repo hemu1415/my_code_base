@@ -20,7 +20,6 @@ namespace libevent
             void loop()
             {
                 std::cout << "start loop" << std::endl;
-                std::cout << base_ << std::endl;
                 int ret = event_base_dispatch(base_);
                 std::cout << "end loop: " << ret << std::endl;
             }

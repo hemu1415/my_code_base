@@ -2,6 +2,8 @@
 #include <iostream>
 #include <memory>
 
+#include <event2/buffer.h> //FIXME, remove me
+
 #include <TcpServer.h>
 #include <BufferEvent.h>
 #include <TcpConnection.h>
@@ -14,19 +16,30 @@ void TcpServer::addNewConnection(struct evconnlistener *listener, evutil_socket_
     std::cout << "create new connection" << std::endl;
 
     //connection pool?
-    auto tcpConnection = std::make_shared<TcpConnection>(eventLoop_, sock);
-
-    tcpConnection->setCB(std::bind(&TcpServer::readCallback, this, _1, _2), 
-                         std::bind(&TcpServer::writeCallback, this, _1, _2));
-    connections_.push_back(*tcpConnection); //change TcpServer obj, the callback cann't be const
+    TcpServer* server = static_cast<TcpServer*>(ptr);
+    
+    //FIXME TcpConnection having bufferevent, can not be copy and destroy
+    server->addConnection(sock);
 }
 
-void TcpServer::readCallback(struct bufferevent* bev, void *ptr) const
+void TcpServer::readCallback(struct bufferevent* bev, void *ptr)
 {
     std::cout << "TcpServer::readCallback" << std::endl;
+
+    TcpServer* server = static_cast<TcpServer*>(ptr);
+
+    struct evbuffer *input = bufferevent_get_input(bev); //FIXME
+    size_t sz = evbuffer_get_length(input);
+    if(sz > 0)
+    {
+        char buf[256] = {0};
+        bufferevent_read(bev, buf, sz);
+        auto message = std::make_shared<StringMessage>(buf);
+        server->messageQueue_->pushInQueue(message);
+    }
 }
 
-void TcpServer::writeCallback(struct bufferevent* bev, void *ptr) const
+void TcpServer::writeCallback(struct bufferevent* bev, void *ptr)
 {
 }
 

@@ -112,7 +112,9 @@ conn_readcb(struct bufferevent *bev, void *user_data)
     size_t sz = evbuffer_get_length(input);
     if (sz > 0)
     {
-        bufferevent_read(bev, g_szReadMsg, sz);
+        printf("will read %d bytes\n", sz);
+        size_t rd = bufferevent_read(bev, g_szReadMsg, sz);
+        printf("read %d bytes\n", rd);
         printf("cli:>>%s\n", g_szReadMsg);
         memset(g_szWriteMsg, 0x00, sizeof(g_szWriteMsg));
         snprintf(g_szWriteMsg, sizeof(g_szWriteMsg)-1, "hi client, this count is %d", g_iCnt);

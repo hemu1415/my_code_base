@@ -12,13 +12,19 @@ namespace base
 class TcpConnection {
     public:
         TcpConnection()=default;
-        TcpConnection(std::shared_ptr<EventLoop> eventLoop, evutil_socket_t sock):bufferEvent_(eventLoop->getBase(), sock)
+        TcpConnection(std::shared_ptr<EventLoop> eventLoop, evutil_socket_t sock):bufferEvent_(eventLoop->getBase(), sock) //FIXME drop Eventloop, pass EventBase
         {
+            std::cout << "TcpConnection ctor" << std::endl;
         }
 
-        void setCB(const BufferEvent::EventCallback& readCb, const BufferEvent::EventCallback& writeCb)
+        ~TcpConnection()
         {
-            bufferEvent_.setCB(readCb, writeCb);
+            std::cout << "TcpConnection detor" << std::endl;
+        }
+
+        void setCB(BufferEvent::EventCallback readCb, BufferEvent::EventCallback writeCb, void *cbarg)
+        {
+            bufferEvent_.setCB(readCb, writeCb, cbarg);
         }
 
     private:
