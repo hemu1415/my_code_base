@@ -22,6 +22,7 @@ class TcpServer {
                                    messageQueue_(new MessageQueue),
                                    threadPool_(messageQueue_) //FIXME
         {
+            connections_.reserve(10);
         };
 
         void start()
@@ -35,7 +36,10 @@ class TcpServer {
 
         void addConnection(evutil_socket_t sock)//FIXME
         {
-            connections_.emplace_back(eventLoop_, sock); //change TcpServer obj, the callback cann't be const
+            //TODO the vector connections must reserve some, otherwise when add new connection, the vector will relocate
+            //which will call move constructor(noexcept), otherwise it will call copy constructor(in this case) and then
+            //deconstructor, then the first connection will be destroyed!!!
+            connections_.emplace_back(eventLoop_, sock);
             TcpConnection& connection = connections_.back();
             connection.setCB(&TcpServer::readCallback, &TcpServer::writeCallback, this);
         }

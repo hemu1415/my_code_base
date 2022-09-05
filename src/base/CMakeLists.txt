@@ -25,5 +25,6 @@ target_include_directories(base
 target_link_libraries(base
   PRIVATE
     event
+    pthread
   )
 
