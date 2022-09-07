@@ -8,13 +8,9 @@
 namespace libevent
 {
     class EventBase { //if EventBase is copyable, after that it will be released. FIXME
-        static void deleter(struct event_base* x) {
-            std::cout << "free event base" << std::endl;
-            event_base_free(x);
-        }
-
         public:
-            EventBase():base_(event_base_new(), deleter)
+            EventBase():base_(event_base_new(), [](struct event_base* e){ event_base_free(e); }) //add a custom deleter to make EventBase obj copyable :)
+
             {
                 if(base_.get() == NULL)
                     //throw exception
