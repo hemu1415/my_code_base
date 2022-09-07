@@ -11,7 +11,7 @@
 using namespace base;
 using namespace std::placeholders;
 
-void TcpServer::addNewConnection(struct evconnlistener *listener, evutil_socket_t sock, struct sockaddr *addr, int len, void *ptr) //raw libevent interface exposed here, FIXME
+void TcpServer::newConnectionCallback(struct evconnlistener *listener, evutil_socket_t sock, struct sockaddr *addr, int len, void *ptr) //raw libevent interface exposed here, FIXME
 {
     std::cout << "create new connection" << std::endl;
 

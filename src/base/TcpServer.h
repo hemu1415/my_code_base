@@ -9,6 +9,7 @@
 #include <Address.h>
 #include <MessageQueue.h>
 #include <ThreadPool.h>
+#include <StateMachine.h>
 
 using namespace std::placeholders;
 
@@ -20,20 +21,35 @@ class TcpServer {
         TcpServer(Address address, std::shared_ptr<EventLoop> eventLoop):address_(address),eventLoop_(eventLoop),
                                    acceptor_(new Acceptor(eventLoop, address)),
                                    messageQueue_(new MessageQueue),
-                                   threadPool_(messageQueue_) //FIXME
+                                   threadPool_(messageQueue_)
         {
             connections_.reserve(10);
         };
 
         void start()
         {
-            acceptor_->setConnectionCallback(&TcpServer::addNewConnection, this);
+            acceptor_->setConnectionCallback(&TcpServer::newConnectionCallback, this);
             threadPool_.start(1); //TODO read from config
             eventLoop_->loop();
         }
 
         std::shared_ptr<EventLoop> getEventLoop() { return eventLoop_; }
 
+        void registerStateMachine(std::shared_ptr<StateMachine> stateMachine)
+        {
+            stateMachine_ = stateMachine;
+        }
+
+        void processEvent(Register event)
+        {
+            stateMachine_->processEvent(event);
+        }
+
+        static void newConnectionCallback(struct evconnlistener *listener, evutil_socket_t sock, struct sockaddr *addr, int len, void *ptr); //MUST be const!
+        static void readCallback(struct bufferevent* bev, void *ptr);
+        static void writeCallback(struct bufferevent* bev, void *ptr);
+
+    private:
         void addConnection(evutil_socket_t sock)//FIXME
         {
             //TODO the vector connections must reserve some, otherwise when add new connection, the vector will relocate
@@ -44,10 +60,6 @@ class TcpServer {
             connection.setCB(&TcpServer::readCallback, &TcpServer::writeCallback, this);
         }
 
-        static void addNewConnection(struct evconnlistener *listener, evutil_socket_t sock, struct sockaddr *addr, int len, void *ptr); //MUST be const!
-        static void readCallback(struct bufferevent* bev, void *ptr);
-        static void writeCallback(struct bufferevent* bev, void *ptr);
-
     private:
         Address address_;
         std::shared_ptr<MessageQueue> messageQueue_;
@@ -55,6 +67,7 @@ class TcpServer {
         std::shared_ptr<EventLoop> eventLoop_;
         std::unique_ptr<Acceptor> acceptor_;
         std::vector<TcpConnection> connections_;
+        std::shared_ptr<StateMachine> stateMachine_;
 };
 
 }
