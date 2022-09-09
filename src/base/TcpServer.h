@@ -38,11 +38,7 @@ class TcpServer {
         void registerStateMachine(std::shared_ptr<StateMachine> stateMachine)
         {
             stateMachine_ = stateMachine;
-        }
-
-        void processEvent(Register event)
-        {
-            stateMachine_->processEvent(event);
+            threadPool_.setStateMachine(stateMachine_);
         }
 
         static void newConnectionCallback(struct evconnlistener *listener, evutil_socket_t sock, struct sockaddr *addr, int len, void *ptr); //MUST be const!

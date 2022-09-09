@@ -1,15 +1,24 @@
 
+#pragma once
+
+#include <string>
+
 #include <boost/msm/back/state_machine.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
 #include <boost/msm/front/euml/common.hpp>
 
 #include <StateMachine.h>
+#include <Message.h>
 
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 using namespace boost::msm::front;
 
+struct StringMessage
+{
+    std::string str;
+};
 
 struct TraceManagerSM_ : public msm::front::state_machine_def<TraceManagerSM_>
 {
@@ -47,7 +56,7 @@ struct TraceManagerSM_ : public msm::front::state_machine_def<TraceManagerSM_>
     struct transition_table : mpl::vector<
         //             Start                  Event                    Next                   Action               Guard
         //  +-----------------------+-----------------------+------------------------+---------------------+----------------------+
-        Row < Idle                  ,        Register       ,       Connected        , RegisterHandler                            >
+        Row < Idle                  ,    base::StringMessage       ,       Connected        , RegisterHandler                            >
     > {};
 
 };
@@ -55,13 +64,26 @@ struct TraceManagerSM_ : public msm::front::state_machine_def<TraceManagerSM_>
 // Pick a back-end
 typedef msm::back::state_machine<TraceManagerSM_> TraceManagerSM;
 
-class TraceManagerStateMachine : public StateMachine {
+class TraceManagerStateMachine : public base::StateMachine {
     public:
-        void processEvent(Register event)
+        TraceManagerStateMachine(std::string name):name_(name)
         {
-            sm.process_event(event);
+            std::cout << "sm address: " << (void*)&sm_ << std::endl;
+            sm_.start();
         }
+
+        void processEvent(std::shared_ptr<base::Message> event)
+        {
+            std::shared_ptr<base::StringMessage> message = std::dynamic_pointer_cast<base::StringMessage>(event);
+            sm_.process_event(*message); //FIXME
+        }
+        ~TraceManagerStateMachine()
+        {
+            std::cout << "TraceManagerStateMachine detor" << std::endl;
+        }
+        std::string getName(){return name_;}
     private:
-        TraceManagerSM sm;
+        std::string name_;
+        TraceManagerSM sm_;
 };
 

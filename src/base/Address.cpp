@@ -7,7 +7,10 @@ using namespace base;
 
 Address::Address(std::string ip, uint16_t port)
 {
-    //validate ip pattern, if fail, the data member would not be destructed!!!
+    if (!validate(ip))
+    {
+        throw std::invalid_argument("ERROR: wrong ip"); //FIXME: using defined exception
+    }
     addr_.sin_family = AF_INET;
     addr_.sin_port = htons(port);
     inet_pton(AF_INET, ip.c_str(), &(addr_.sin_addr));

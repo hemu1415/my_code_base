@@ -31,15 +31,23 @@ class ThreadPool {
             while (running_)
             {
                 queue_->wait();
-                auto message = queue_->popFromQueue();
+                std::shared_ptr<Message> message = queue_->popFromQueue();
                 std::cout << "processing message " << message->getData() << std::endl;
+                stateMachine_->processEvent(message);
             }
+        }
+
+        void setStateMachine(std::shared_ptr<StateMachine> stateMachine) //FIXME
+        {
+            stateMachine_ = stateMachine;
         }
 
     private:
         bool running_;
         std::vector<std::thread> threads_;
         std::shared_ptr<MessageQueue> queue_;
+        std::shared_ptr<StateMachine> stateMachine_;
+
 };
 
 }

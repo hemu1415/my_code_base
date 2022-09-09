@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdint>
+#include <regex>
 
 #include <netinet/in.h>
 
@@ -19,9 +20,15 @@ class Address {
         uint16_t port();
 
     private:
-        //std::variant
+        bool validate(const std::string& ip)
+        {
+            std::regex ipv4(pattern);
+            return std::regex_match(ip, ipv4)?true:false;
+        }
+
+    private:
+        const std::string pattern = "(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])";
         struct sockaddr_in addr_;
-        //struct sockaddr_in6 addr6_;
 
 };
 
